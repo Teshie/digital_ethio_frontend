@@ -1,11 +1,14 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../resources/apiClient";
+import { set_token, set_user_data, set_user_status } from "../store/actions";
 
 const Login = () => {
   const [user, setUser] = useState({ username: "", password: "" });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const loginHandler = async (e) => {
     e.preventDefault();
@@ -19,24 +22,25 @@ const Login = () => {
       try {
         axios.post(`${baseURL}/account/login`, user).then(
           (response) => {
-            // set_token(response.data.token);
-            // set_user_data(response.data.user);
-            // set_user_status({
-            //   approved: response.data.user.approved,
-            //   loggedIn: true,
-            //   token: response.data.token,
-            // });
-            // return props.history.push("/");
+            dispatch(set_token(response.data.token));
+            dispatch(set_user_data(response.data.user));
+            dispatch(
+              set_user_status({
+                loggedIn: true,
+                token: response.data.token,
+              })
+            );
 
             console.log(response.data);
-
-            // return response.data.user.user_type === "ClientUser"
-            //   ? props.history.push("/")
-            //   : response.data.user.user_type === "CybermindAdmin"
-            //   ? props.history.push("/super_threat_vectors")
-            //   : response.data.user.user_type === "ClientAdmin"
-            //   ? props.history.push("/adminhome")
-            //   : null;
+            return response.data.user.user_type === "CEO"
+              ? navigate("/ceopage")
+              : response.data.user.user_type === "SUB"
+              ? navigate("/subdepartments")
+              : response.data.user.user_type === "HoD"
+              ? navigate("/departments")
+              : response.data.user.user_type === "CLIENT_ADMIN"
+              ? navigate("/client_admin")
+              : null;
           },
           (err) => {
             alert("username and password is not valid");

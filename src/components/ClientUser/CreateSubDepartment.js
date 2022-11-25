@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/NavBar/NavBar";
-import { baseURL } from "../resources/apiClient";
+import { useSelector } from "react-redux";
+import { baseURL } from "../../resources/apiClient";
+import Navbar from "../NavBar/NavBar";
 
-const CEO = () => {
-  const [CeoList, setCeoList] = useState([]);
+const CreateSubDepartment = () => {
+  const [report, setReport] = useState([]);
   const [departmentList, setDepartmentList] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const toggleModal = () => setShowModal(!showModal);
@@ -12,12 +13,13 @@ const CEO = () => {
   const [id, setId] = useState("");
   const [description, setDescription] = useState("");
   const [department, setDepartment] = useState(0);
+  const my_department = useSelector((state) => state.user).department;
   const getCEO = () => {
     // fetch CEO data from backend
     axios
-      .get(`${baseURL}/account/list-accounts`)
+      .get(`${baseURL}/department/list-create-subreport`)
       .then((res) => {
-        setCeoList(res.data);
+        setReport(res.data);
       })
       .catch((err) => {});
     axios
@@ -49,20 +51,7 @@ const CEO = () => {
     getCEO();
   }, []);
 
-  console.log(departmentList, "departmentList");
-
-  // const getEmailCeo = CeoList.filter().map(({ email, ...rest }) => ({
-  //   email,
-  // }));
-  console.log(
-    CeoList.filter((user) => user.user_type === "CEO").map(
-      ({ email, ...rest }) => ({ email })
-    )
-  );
-  const getEmailCeo = CeoList.filter((user) => user?.user_type === "CEO")?.map(
-    ({ email, ...rest }) => ({ email })
-  );
-  const ceoEmail = getEmailCeo[0]?.email;
+  console.log(report, "reports");
 
   return (
     <div>
@@ -83,7 +72,7 @@ const CEO = () => {
           <div className="bg-gray-100 flex justify-evenly h-16">
             <div className="w-64 rounded-t-lg bg-green-600 ">
               <span className="flex justify-center items-center p-4 text-white text-bold text-xl">
-                CEO
+                My Reports
               </span>
             </div>
             <div className="flex text-gray-400 flex-1 justify-end items-center space-x-4 pr-24"></div>
@@ -92,32 +81,29 @@ const CEO = () => {
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
                 <th scope="col" class="px-6 py-3">
-                  Email
+                  Report Name
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Managing Department
+                  Report Description
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Departments Under It's Management
+                  Status
                 </th>
               </tr>
             </thead>
             {/* <tbody>{DisplayData}</tbody> */}
-            <tr>
-              <td className="px-6 py-3">{ceoEmail}</td>
-              <td className="px-6 py-3 font-bold">
-                {" "}
-                Managing Department -None
-              </td>
-              <td className="px-6 py-3">
-                {" "}
-                <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  {departmentList?.map((x) => (
-                    <option>{x.name}</option>
-                  ))}
-                </select>
-              </td>
-            </tr>
+            {report.map((items) => {
+              const { id, title, description, department, is_active } = items;
+              return (
+                <tr>
+                  <td className="px-6 py-3">{title}</td>
+                  <td className="px-6 py-3 font-bold"> {description}</td>
+                  <td className="px-6 py-3">
+                    {is_active ? "Active" : "Closed"}
+                  </td>
+                </tr>
+              );
+            })}
           </table>
         </div>
         <div className="grid place-items-center">
@@ -153,7 +139,7 @@ const CEO = () => {
                   </button>
                   <div class="py-6 px-6 lg:px-8">
                     <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                      Add Sub Department to {name}
+                      Send Report
                     </h3>
                     <form class="space-y-6" action="#">
                       <div>
@@ -227,4 +213,4 @@ const CEO = () => {
   );
 };
 
-export default CEO;
+export default CreateSubDepartment;
